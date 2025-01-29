@@ -15,6 +15,7 @@ const Main = () => {
     const [sortOrder, setSortOrder] = useState('A-Z');
 
     useEffect(() => {
+        // Загрузка данных с API NASA
         const fetchMeteors = async () => {
             try {
                 const response = await axios.get(
@@ -30,6 +31,7 @@ const Main = () => {
                 setMeteors(formattedData);
                 setFilteredMeteors(formattedData);
 
+                // Установка начальных значений для ползунков
                 const minSize = Math.min(...formattedData.map((m) => m.size));
                 const maxSize = Math.max(...formattedData.map((m) => m.size));
                 const minDistance = Math.min(...formattedData.map((m) => parseFloat(m.distance)));
@@ -46,6 +48,7 @@ const Main = () => {
     }, []);
 
     useEffect(() => {
+        // Фильтрация и сортировка данных
         let filtered = meteors.filter((meteor) => {
             const matchesSearch = meteor.name.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesSize = meteor.size >= sizeRange[0] && meteor.size <= sizeRange[1];
@@ -72,16 +75,18 @@ const Main = () => {
         setSortOrder(sortOrder === 'A-Z' ? 'Z-A' : 'A-Z');
     };
 
+    // Определение размера изображения
     const getImageSize = (size) => {
-        if (size < 50) return 'small';
-        if (size < 150) return 'medium';
-        return 'large';
+        if (size < 50) return 'small'; // Маленький метеорит
+        if (size < 150) return 'medium'; // Средний метеорит
+        return 'large'; // Большой метеорит
     };
 
     return (
         <div className="main">
             <Header />
             <div className="filters">
+                {/* Поле поиска */}
                 <input
                     type="text"
                     placeholder="Поиск..."
@@ -89,11 +94,66 @@ const Main = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
 
-                {/* Фильтры и сортировка */}
-                {/* ... (остальной код фильтров и сортировки) */}
+                {/* Фильтр по размеру */}
+                <div className="filter">
+                    <span>Размер</span>
+                    <div>
+                        <span>Мин: {sizeRange[0]}</span>
+                        <span style={{ marginLeft: '30px' }}>Макс: {sizeRange[1]}</span>
+                    </div>
+                    <input
+                        type="range"
+                        min={Math.min(...meteors.map((m) => m.size))}
+                        max={Math.max(...meteors.map((m) => m.size))}
+                        value={sizeRange[0]}
+                        onChange={(e) => setSizeRange([parseFloat(e.target.value), sizeRange[1]])}
+                    />
+                    <input
+                        type="range"
+                        min={Math.min(...meteors.map((m) => m.size))}
+                        max={Math.max(...meteors.map((m) => m.size))}
+                        value={sizeRange[1]}
+                        onChange={(e) => setSizeRange([sizeRange[0], parseFloat(e.target.value)])}
+                    />
+                </div>
 
+                {/* Фильтр по расстоянию */}
+                <div className="filter">
+                    <span>Расстояние</span>
+                    <div>
+                        <span>Мин: {distanceRange[0]}</span>
+                        <span style={{ marginLeft: '30px' }}>Макс: {distanceRange[1]}</span>
+                    </div>
+                    <input
+                        type="range"
+                        min={Math.min(...meteors.map((m) => parseFloat(m.distance)))}
+                        max={Math.max(...meteors.map((m) => parseFloat(m.distance)))}
+                        value={distanceRange[0]}
+                        onChange={(e) => setDistanceRange([parseFloat(e.target.value), distanceRange[1]])}
+                    />
+                    <input
+                        type="range"
+                        min={Math.min(...meteors.map((m) => parseFloat(m.distance)))}
+                        max={Math.max(...meteors.map((m) => parseFloat(m.distance)))}
+                        value={distanceRange[1]}
+                        onChange={(e) => setDistanceRange([distanceRange[0], parseFloat(e.target.value)])}
+                    />
+                </div>
+
+                {/* Фильтр по опасности */}
+                <select value={hazardFilter} onChange={(e) => setHazardFilter(e.target.value)}>
+                    <option value="Все">Все</option>
+                    <option value="Опасен">Опасен</option>
+                    <option value="Не опасен">Не опасен</option>
+                </select>
+
+                {/* Кнопка сортировки */}
+                <button onClick={handleSortToggle}>
+                    Сортировать: {sortOrder === 'A-Z' ? 'A-Z' : 'Z-A'}
+                </button>
             </div>
 
+            {/* Блок витрины */}
             <div className="showcase-container">
                 <div className="showcase">
                     {filteredMeteors.map((meteor, index) => {
