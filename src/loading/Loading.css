@@ -1,0 +1,23 @@
+.loading-spinner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(44, 44, 44, 0.24);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1100;
+}
+
+.loading-spinner img {
+    width: 200px;
+    height: auto;
+}
+
+#content {
+    visibility: hidden;
+}
+
+
