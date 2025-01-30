@@ -14,12 +14,15 @@ const Main = () => {
     const [hazardFilter, setHazardFilter] = useState('Все');
     const [sortOrder, setSortOrder] = useState('A-Z');
 
+    // Состояние для отслеживания активности кнопок в карточках
+    const [activeButtons, setActiveButtons] = useState({});
+
     useEffect(() => {
         // Загрузка данных с API NASA
         const fetchMeteors = async () => {
             try {
                 const response = await axios.get(
-                    'https://api.nasa.gov/neo/rest/v1/feed?start_date=2015-09-07&end_date=2015-09-08&api_key=DEMO_KEY'
+                    'https://api.nasa.gov/neo/rest/v1/feed?start_date=2015-09-07&end_date=2015-09-08&api_key=ElN1grRp9GLZYYg8pAerHc3aq8dLfPfmshKAr89I'
                 );
                 const data = Object.values(response.data.near_earth_objects).flat();
                 const formattedData = data.map((meteor) => ({
@@ -36,14 +39,12 @@ const Main = () => {
                 const maxSize = Math.max(...formattedData.map((m) => m.size));
                 const minDistance = Math.min(...formattedData.map((m) => parseFloat(m.distance)));
                 const maxDistance = Math.max(...formattedData.map((m) => parseFloat(m.distance)));
-
                 setSizeRange([minSize, maxSize]);
                 setDistanceRange([minDistance, maxDistance]);
             } catch (error) {
                 console.error('Ошибка при загрузке данных:', error);
             }
         };
-
         fetchMeteors();
     }, []);
 
@@ -58,16 +59,13 @@ const Main = () => {
                 hazardFilter === 'Все' ||
                 (hazardFilter === 'Опасен' && meteor.isHazardous) ||
                 (hazardFilter === 'Не опасен' && !meteor.isHazardous);
-
             return matchesSearch && matchesSize && matchesDistance && matchesHazard;
         });
-
         if (sortOrder === 'A-Z') {
             filtered.sort((a, b) => a.name.localeCompare(b.name));
         } else {
             filtered.sort((a, b) => b.name.localeCompare(a.name));
         }
-
         setFilteredMeteors(filtered);
     }, [searchTerm, sizeRange, distanceRange, hazardFilter, sortOrder, meteors]);
 
@@ -82,6 +80,22 @@ const Main = () => {
         return 'large'; // Большой метеорит
     };
 
+    // Обработчик нажатия на кнопку "На уничтожение"
+    const handleDestroyClick = (index) => {
+        setActiveButtons((prev) => ({
+            ...prev,
+            [index]: { destroyActive: false, cancelActive: true },
+        }));
+    };
+
+    // Обработчик нажатия на кнопку "Отмена"
+    const handleCancelClick = (index) => {
+        setActiveButtons((prev) => ({
+            ...prev,
+            [index]: { destroyActive: true, cancelActive: false },
+        }));
+    };
+
     return (
         <div className="main">
             <Header />
@@ -93,14 +107,14 @@ const Main = () => {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
-
                 {/* Фильтр по размеру */}
                 <div className="filter">
-                    <span>Размер</span>
-                    <div>
-                        <span>Мин: {sizeRange[0]}</span>
-                        <span style={{ marginLeft: '30px' }}>Макс: {sizeRange[1]}</span>
-                    </div>
+          <span>
+            <b>Размер</b>
+          </span>
+                    <span>
+            <b>Мин:</b> {Math.round(sizeRange[0])}
+          </span>
                     <input
                         type="range"
                         min={Math.min(...meteors.map((m) => m.size))}
@@ -108,6 +122,9 @@ const Main = () => {
                         value={sizeRange[0]}
                         onChange={(e) => setSizeRange([parseFloat(e.target.value), sizeRange[1]])}
                     />
+                    <span>
+            <b>Макс:</b> {Math.round(sizeRange[1])}
+          </span>
                     <input
                         type="range"
                         min={Math.min(...meteors.map((m) => m.size))}
@@ -116,14 +133,14 @@ const Main = () => {
                         onChange={(e) => setSizeRange([sizeRange[0], parseFloat(e.target.value)])}
                     />
                 </div>
-
                 {/* Фильтр по расстоянию */}
                 <div className="filter">
-                    <span>Расстояние</span>
-                    <div>
-                        <span>Мин: {distanceRange[0]}</span>
-                        <span style={{ marginLeft: '30px' }}>Макс: {distanceRange[1]}</span>
-                    </div>
+          <span>
+            <b>Расстояние</b>
+          </span>
+                    <span>
+            <b>Мин:</b> {Math.round(distanceRange[0])}
+          </span>
                     <input
                         type="range"
                         min={Math.min(...meteors.map((m) => parseFloat(m.distance)))}
@@ -131,6 +148,9 @@ const Main = () => {
                         value={distanceRange[0]}
                         onChange={(e) => setDistanceRange([parseFloat(e.target.value), distanceRange[1]])}
                     />
+                    <span>
+            <b>Макс:</b> {Math.round(distanceRange[1])}
+          </span>
                     <input
                         type="range"
                         min={Math.min(...meteors.map((m) => parseFloat(m.distance)))}
@@ -139,20 +159,17 @@ const Main = () => {
                         onChange={(e) => setDistanceRange([distanceRange[0], parseFloat(e.target.value)])}
                     />
                 </div>
-
-                {/* Фильтр по опасности */}
+                {/* Выпадающий список */}
                 <select value={hazardFilter} onChange={(e) => setHazardFilter(e.target.value)}>
                     <option value="Все">Все</option>
                     <option value="Опасен">Опасен</option>
                     <option value="Не опасен">Не опасен</option>
                 </select>
-
                 {/* Кнопка сортировки */}
                 <button onClick={handleSortToggle}>
                     Сортировать: {sortOrder === 'A-Z' ? 'A-Z' : 'Z-A'}
                 </button>
             </div>
-
             {/* Блок витрины */}
             <div className="showcase-container">
                 <div className="showcase">
@@ -160,18 +177,50 @@ const Main = () => {
                         const imageSize = getImageSize(meteor.size);
                         const imagePath = meteor.isHazardous ? dangerImage : notDangerImage;
 
+                        // Получаем состояние кнопок для текущей карточки
+                        const { destroyActive = true, cancelActive = false } = activeButtons[index] || {};
+
                         return (
                             <div key={index} className="card">
-                                <img
-                                    src={imagePath}
-                                    alt={meteor.isHazardous ? 'Опасный метеорит' : 'Неопасный метеорит'}
-                                    className={`meteor-image ${imageSize}`}
-                                />
-                                <h3>{meteor.name}</h3>
-                                <p>Размер: {meteor.size.toFixed(2)} м</p>
-                                <p>Расстояние до Земли: {parseFloat(meteor.distance).toFixed(2)} км</p>
-                                <p>Опасность: {meteor.isHazardous ? 'Опасен' : 'Не опасен'}</p>
-                                <button>Отправить на уничтожение</button>
+                                {/* Секция для изображения */}
+                                <div className="image-section">
+                                    <img
+                                        src={imagePath}
+                                        alt={meteor.isHazardous ? 'Опасный метеорит' : 'Неопасный метеорит'}
+                                        className={`meteor-image ${imageSize}`}
+                                    />
+                                </div>
+                                {/* Секция для текста */}
+                                <div className="text-section">
+                                    <h3>{meteor.name}</h3>
+                                    <p>Размер: {meteor.size.toFixed(2)} м</p>
+                                    <p>
+                                        Расстояние до Земли: <br /> {parseFloat(meteor.distance).toFixed(2)} км
+                                    </p>
+                                    <p>Опасность: {meteor.isHazardous ? 'Опасен' : 'Не опасен'}</p>
+                                </div>
+                                {/* Секция для кнопок */}
+                                <div className="button-section">
+                                    <button
+                                        style={{
+                                            backgroundColor: destroyActive ? '#ff4d4d' : '#7c8887',
+                                            cursor: destroyActive ? 'pointer' : 'not-allowed',
+                                        }}
+                                        onClick={() => destroyActive && handleDestroyClick(index)}
+                                    >
+                                        На уничтожение
+                                    </button>
+                                    <button
+                                        style={{
+                                            marginTop: '10px',
+                                            backgroundColor: cancelActive ? '#1a9dff' : '#7c8887',
+                                            cursor: cancelActive ? 'pointer' : 'not-allowed',
+                                        }}
+                                        onClick={() => cancelActive && handleCancelClick(index)}
+                                    >
+                                        Отмена
+                                    </button>
+                                </div>
                             </div>
                         );
                     })}
