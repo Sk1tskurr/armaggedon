@@ -113,6 +113,15 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    position: relative; /* Для позиционирования иконки внутри секции */
+}
+
+.dino-icon {
+    position: absolute;
+    bottom: 1%; /* Расположение внизу */
+    left: 1%; /* Расположение слева */
+    width: 30%; /* Размер иконки (не более 10% от секции) */
+    height: auto; /* Сохраняем пропорции */
 }
 
 .card .text-section {

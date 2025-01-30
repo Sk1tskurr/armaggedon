@@ -4,6 +4,8 @@ import axios from 'axios';
 import './Main.css';
 import dangerImage from '../images/danger.png'; // Импорт изображений
 import notDangerImage from '../images/not_danger.png';
+import dinoColorImage from '../images/dino_color.png'; // Импорт цветной иконки динозавра
+import dinoImage from '../images/dino.webp'; // Импорт черно-белой иконки динозавра
 
 const Main = () => {
     const [meteors, setMeteors] = useState([]);
@@ -180,6 +182,10 @@ const Main = () => {
                         // Получаем состояние кнопок для текущей карточки
                         const { destroyActive = true, cancelActive = false } = activeButtons[index] || {};
 
+                        // Логика выбора иконки динозавра
+                        const isLargeOrHazardous = meteor.size >= 150 || meteor.isHazardous;
+                        const dinoIcon = isLargeOrHazardous && destroyActive ? dinoImage : dinoColorImage;
+
                         return (
                             <div key={index} className="card">
                                 {/* Секция для изображения */}
@@ -188,6 +194,12 @@ const Main = () => {
                                         src={imagePath}
                                         alt={meteor.isHazardous ? 'Опасный метеорит' : 'Неопасный метеорит'}
                                         className={`meteor-image ${imageSize}`}
+                                    />
+                                    {/* Иконка динозавра */}
+                                    <img
+                                        src={dinoIcon}
+                                        alt="Динозавр"
+                                        className="dino-icon"
                                     />
                                 </div>
                                 {/* Секция для текста */}
