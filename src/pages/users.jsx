@@ -5,7 +5,7 @@ import ConfirmationModal from './ConfirmationModal';
 import { Header } from '../header/Header';
 import Loading from '../loading/Loading';
 
-const MainPage = () => {
+const UsersPage = () => {
     const [loading, setLoading] = useState(false);
     const [tableData, setTableData] = useState([]);
     const [selectedRowId, setSelectedRowId] = useState(null);
@@ -110,7 +110,11 @@ const MainPage = () => {
                                 alert('Ошибка при удалении строки');
                             }
                         })
-                        .catch(error => console.error('Ошибка:', error));
+                        .catch(error => console.error('Ошибка:', error))
+                        .finally(() => {
+                            setShowConfirmation(false); // Закрываем модальное окно
+                            setLoading(false); // Сбрасываем состояние загрузки
+                        });
                 });
                 setShowConfirmation(true);
                 setLoading(false); // Сбрасываем состояние загрузки после 0.5 секунд
@@ -159,7 +163,7 @@ const MainPage = () => {
         <div className="main-page-container">
             {loading && <Loading />}
             <Header username={username} />
-            <div className="maine_page-container">
+            <div className="users_page-container">
                 <div className="table-wrapper">
                     <table id="data-table">
                         <thead>
@@ -199,7 +203,7 @@ const MainPage = () => {
                 )}
                 {/*заполнение и показ модального окна*/}
                 {showModal && (
-                    <div id="mainPageModal" className="modal">
+                    <div id="usersPageModal" className="modal">
                         <div className="modal-content">
                             <span className="close" onClick={() => setShowModal(false)}>&times;</span>
                             <form id="modalForm" onSubmit={handleFormSubmit}>
@@ -249,4 +253,4 @@ const MainPage = () => {
     );
 };
 
-export default MainPage;
+export default UsersPage;

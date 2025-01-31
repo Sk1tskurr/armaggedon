@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Header } from '../header/Header';
 import axios from 'axios';
-// import './History.css'; // Убрано тк берёт стиль таблицы users
+// import './History.css'; // Убрано, так как не требуется дополнительное описание стилей
 
 const History = () => {
     const [history, setHistory] = useState([]);

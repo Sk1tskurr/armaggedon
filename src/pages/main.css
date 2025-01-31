@@ -1,3 +1,52 @@
+/* Медиа-запрос для мобильных устройств */
+@media (max-width: 768px) {
+    .filters {
+        flex-direction: column; /* Элементы фильтров располагаются вертикально */
+        gap: 10px; /* Уменьшаем расстояние между элементами */
+        padding: 10px; /* Уменьшаем внутренние отступы */
+    }
+
+    .filters input[type="text"],
+    .filters select,
+    .filters button {
+        width: 100%; /* Элементы занимают всю ширину */
+        margin: 5px 0; /* Добавляем отступы между элементами */
+    }
+
+    .filter input[type="range"] {
+        width: 100%; /* Ползунки занимают всю ширину */
+    }
+
+    .showcase-container {
+        height: auto; /* Убираем фиксированную высоту */
+        padding: 10px; /* Уменьшаем внутренние отступы */
+    }
+
+    .card {
+        width: 100%; /* Карточки занимают всю ширину */
+        height: auto; /* Убираем фиксированную высоту */
+        flex-direction: column; /* Элементы карточки располагаются вертикально */
+        padding: 10px; /* Уменьшаем внутренние отступы */
+    }
+
+    .card .image-section,
+    .card .text-section,
+    .card .button-section {
+        width: 100%; /* Секции занимают всю ширину */
+    }
+
+    .card .button-section {
+        margin-top: 10px; /* Добавляем отступ сверху */
+    }
+
+    .meteor-image.small,
+    .meteor-image.medium,
+    .meteor-image.large {
+        width: 50%; /* Уменьшаем размер изображений */
+        height: auto; /* Сохраняем пропорции */
+    }
+}
+
 .main {
     display: flex;
     flex-direction: column;
@@ -186,3 +235,4 @@
     width: 85%;
     height: 85%;
 }
+
