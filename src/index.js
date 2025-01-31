@@ -6,6 +6,7 @@ import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import Login from './pages/login';
 import MainPage from './pages/main';
 import Users from './pages/users';
+import History from './pages/history';
 
 
 const router = createBrowserRouter([
@@ -17,10 +18,10 @@ const router = createBrowserRouter([
         path: '/login',
         element: <Login />,
     },
-    // {
-    //     path: '/history',
-    //     element: <History/>,
-    // },
+    {
+        path: '/history',
+        element: <History/>,
+    },
     {
         path: '/users',
         element: <Users />,

@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Header } from '../header/Header';
 import axios from 'axios';
 import './Main.css';
-import dangerImage from '../images/danger.png'; // Импорт изображений
+import dangerImage from '../images/danger.png';
 import notDangerImage from '../images/not_danger.png';
-import dinoColorImage from '../images/dino_color.png'; // Импорт цветной иконки динозавра
-import dinoImage from '../images/dino.webp'; // Импорт черно-белой иконки динозавра
+import dinoColorImage from '../images/dino_color.png';
+import dinoImage from '../images/dino.webp';
 
 const Main = () => {
     const [meteors, setMeteors] = useState([]);
@@ -15,12 +15,24 @@ const Main = () => {
     const [distanceRange, setDistanceRange] = useState([0, 1000]);
     const [hazardFilter, setHazardFilter] = useState('Все');
     const [sortOrder, setSortOrder] = useState('A-Z');
-
-    // Состояние для отслеживания активности кнопок в карточках
     const [activeButtons, setActiveButtons] = useState({});
+    const [history, setHistory] = useState([]);
+    const [username, setUsername] = useState(null); // Состояние для имени пользователя
 
+    // Функция для переключения сортировки
+    const handleSortToggle = () => {
+        setSortOrder(sortOrder === 'A-Z' ? 'Z-A' : 'A-Z');
+    };
+
+    // Функция для определения размера изображения
+    const getImageSize = (size) => {
+        if (size < 50) return 'small'; // Маленький метеорит
+        if (size < 150) return 'medium'; // Средний метеорит
+        return 'large'; // Большой метеорит
+    };
+
+    // Загрузка данных с API NASA
     useEffect(() => {
-        // Загрузка данных с API NASA
         const fetchMeteors = async () => {
             try {
                 const response = await axios.get(
@@ -36,7 +48,6 @@ const Main = () => {
                 setMeteors(formattedData);
                 setFilteredMeteors(formattedData);
 
-                // Установка начальных значений для ползунков
                 const minSize = Math.min(...formattedData.map((m) => m.size));
                 const maxSize = Math.max(...formattedData.map((m) => m.size));
                 const minDistance = Math.min(...formattedData.map((m) => parseFloat(m.distance)));
@@ -50,8 +61,67 @@ const Main = () => {
         fetchMeteors();
     }, []);
 
+    // Загрузка истории из файла history.txt
     useEffect(() => {
-        // Фильтрация и сортировка данных
+        const fetchHistory = async () => {
+            try {
+                const response = await axios.get('/get_history');
+                setHistory(response.data);
+            } catch (error) {
+                console.error('Ошибка при загрузке истории:', error);
+            }
+        };
+        fetchHistory();
+    }, []);
+
+    // Обновление состояния кнопок на основе истории
+    useEffect(() => {
+        const updatedActiveButtons = {};
+        filteredMeteors.forEach((meteor, index) => {
+            const lastEntry = history
+                .filter((entry) => entry.meteorName === meteor.name)
+                .pop();
+            if (lastEntry) {
+                if (lastEntry.action === 'Помещён на уничтожение') {
+                    updatedActiveButtons[index] = { destroyActive: false, cancelActive: true };
+                } else if (lastEntry.action === 'Снят с уничтожения') {
+                    updatedActiveButtons[index] = { destroyActive: true, cancelActive: false };
+                }
+            } else {
+                updatedActiveButtons[index] = { destroyActive: true, cancelActive: false };
+            }
+        });
+        setActiveButtons(updatedActiveButtons);
+    }, [history, filteredMeteors]);
+
+    // Обработчик нажатия на кнопку "На уничтожение"
+    const handleDestroyClick = async (index) => {
+        const meteorName = filteredMeteors[index].name;
+
+        try {
+            await axios.post('/destroy', { meteorName }); // Отправляем только название метеорита
+            const response = await axios.get('/get_history');
+            setHistory(response.data);
+        } catch (error) {
+            console.error('Ошибка при отправке запроса на уничтожение:', error);
+        }
+    };
+
+// Обработчик нажатия на кнопку "Отмена"
+    const handleCancelClick = async (index) => {
+        const meteorName = filteredMeteors[index].name;
+
+        try {
+            await axios.post('/recovery', { meteorName }); // Отправляем только название метеорита
+            const response = await axios.get('/get_history');
+            setHistory(response.data);
+        } catch (error) {
+            console.error('Ошибка при отправке запроса на отмену:', error);
+        }
+    };
+
+    // Фильтрация и сортировка данных
+    useEffect(() => {
         let filtered = meteors.filter((meteor) => {
             const matchesSearch = meteor.name.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesSize = meteor.size >= sizeRange[0] && meteor.size <= sizeRange[1];
@@ -63,6 +133,7 @@ const Main = () => {
                 (hazardFilter === 'Не опасен' && !meteor.isHazardous);
             return matchesSearch && matchesSize && matchesDistance && matchesHazard;
         });
+
         if (sortOrder === 'A-Z') {
             filtered.sort((a, b) => a.name.localeCompare(b.name));
         } else {
@@ -70,33 +141,6 @@ const Main = () => {
         }
         setFilteredMeteors(filtered);
     }, [searchTerm, sizeRange, distanceRange, hazardFilter, sortOrder, meteors]);
-
-    const handleSortToggle = () => {
-        setSortOrder(sortOrder === 'A-Z' ? 'Z-A' : 'A-Z');
-    };
-
-    // Определение размера изображения
-    const getImageSize = (size) => {
-        if (size < 50) return 'small'; // Маленький метеорит
-        if (size < 150) return 'medium'; // Средний метеорит
-        return 'large'; // Большой метеорит
-    };
-
-    // Обработчик нажатия на кнопку "На уничтожение"
-    const handleDestroyClick = (index) => {
-        setActiveButtons((prev) => ({
-            ...prev,
-            [index]: { destroyActive: false, cancelActive: true },
-        }));
-    };
-
-    // Обработчик нажатия на кнопку "Отмена"
-    const handleCancelClick = (index) => {
-        setActiveButtons((prev) => ({
-            ...prev,
-            [index]: { destroyActive: true, cancelActive: false },
-        }));
-    };
 
     return (
         <div className="main">
@@ -111,12 +155,12 @@ const Main = () => {
                 />
                 {/* Фильтр по размеру */}
                 <div className="filter">
-          <span>
-            <b>Размер</b>
-          </span>
                     <span>
-            <b>Мин:</b> {Math.round(sizeRange[0])}
-          </span>
+                        <b>Размер</b>
+                    </span>
+                    <span>
+                        <b>Мин:</b> {Math.round(sizeRange[0])}
+                    </span>
                     <input
                         type="range"
                         min={Math.min(...meteors.map((m) => m.size))}
@@ -125,8 +169,8 @@ const Main = () => {
                         onChange={(e) => setSizeRange([parseFloat(e.target.value), sizeRange[1]])}
                     />
                     <span>
-            <b>Макс:</b> {Math.round(sizeRange[1])}
-          </span>
+                        <b>Макс:</b> {Math.round(sizeRange[1])}
+                    </span>
                     <input
                         type="range"
                         min={Math.min(...meteors.map((m) => m.size))}
@@ -137,12 +181,12 @@ const Main = () => {
                 </div>
                 {/* Фильтр по расстоянию */}
                 <div className="filter">
-          <span>
-            <b>Расстояние</b>
-          </span>
                     <span>
-            <b>Мин:</b> {Math.round(distanceRange[0])}
-          </span>
+                        <b>Расстояние</b>
+                    </span>
+                    <span>
+                        <b>Мин:</b> {Math.round(distanceRange[0])}
+                    </span>
                     <input
                         type="range"
                         min={Math.min(...meteors.map((m) => parseFloat(m.distance)))}
@@ -151,8 +195,8 @@ const Main = () => {
                         onChange={(e) => setDistanceRange([parseFloat(e.target.value), distanceRange[1]])}
                     />
                     <span>
-            <b>Макс:</b> {Math.round(distanceRange[1])}
-          </span>
+                        <b>Макс:</b> {Math.round(distanceRange[1])}
+                    </span>
                     <input
                         type="range"
                         min={Math.min(...meteors.map((m) => parseFloat(m.distance)))}
@@ -179,10 +223,8 @@ const Main = () => {
                         const imageSize = getImageSize(meteor.size);
                         const imagePath = meteor.isHazardous ? dangerImage : notDangerImage;
 
-                        // Получаем состояние кнопок для текущей карточки
                         const { destroyActive = true, cancelActive = false } = activeButtons[index] || {};
 
-                        // Логика выбора иконки динозавра
                         const isLargeOrHazardous = meteor.size >= 150 || meteor.isHazardous;
                         const dinoIcon = isLargeOrHazardous && destroyActive ? dinoImage : dinoColorImage;
 

@@ -56,6 +56,20 @@ fs.readFile(infoFilePath, 'utf8', (err, data) => {
     }
 });
 
+const historyFilePath = path.join(__dirname, 'history.txt');
+
+// Проверка и создание файла history.txt, если он не существует
+fs.readFile(historyFilePath, 'utf8', (err, data) => {
+    if (err && err.code === 'ENOENT') {
+        fs.writeFile(historyFilePath, '', (err) => {
+            if (err) throw err;
+            console.log('Файл history.txt создан.');
+        });
+    } else if (err) {
+        throw err;
+    }
+});
+
 // Проверка наличия SESSION_SECRET и вывод сообщения
 if (process.env.SESSION_SECRET) {
     console.log('Текущий ключ\n' + process.env.SESSION_SECRET);
@@ -83,7 +97,7 @@ function checkAuth(req, res, next) {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Добавьте этот маршрут перед раздачей статических файлов
+// Маршрут получения данных из сессии, должен быть перед раздачей статических файлов
 app.get('/session-data', (req, res) => {
     if (req.session.isAuthenticated) {
         res.json({ username: req.session.username });
@@ -176,6 +190,84 @@ app.post('/register_new_user', (req, res) => {
 
 // Маршрут для главной страницы (требует авторизации)
 app.get('/main', checkAuth, (req, res) => {
+    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
+
+
+// Обработка POST-запроса /destroy
+app.post('/destroy', checkAuth, (req, res) => {
+    const { meteorName } = req.body; // Получаем название метеорита из тела запроса
+    const username = req.session.username; // Берем имя пользователя из сессии
+    if (!username || !meteorName) {
+        return res.status(400).json({ success: false, message: 'Недостаточно данных' });
+    }
+
+    const date = new Date().toLocaleString('ru-RU', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+
+    const newLine = `${username}|${meteorName}|Помещён на уничтожение|${date}\n`;
+
+    fs.appendFile(historyFilePath, newLine, (err) => {
+        if (err) {
+            return res.status(500).json({ success: false, message: 'Ошибка записи в файл' });
+        }
+        res.json({ success: true });
+    });
+});
+
+// Обработка POST-запроса /recovery
+app.post('/recovery', checkAuth, (req, res) => {
+    const { meteorName } = req.body; // Получаем название метеорита из тела запроса
+    const username = req.session.username; // Берем имя пользователя из сессии
+    if (!username || !meteorName) {
+        return res.status(400).json({ success: false, message: 'Недостаточно данных' });
+    }
+
+    const date = new Date().toLocaleString('ru-RU', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+
+    const newLine = `${username}|${meteorName}|Снят с уничтожения|${date}\n`;
+
+    fs.appendFile(historyFilePath, newLine, (err) => {
+        if (err) {
+            return res.status(500).json({ success: false, message: 'Ошибка записи в файл' });
+        }
+        res.json({ success: true });
+    });
+});
+
+app.get('/get_history', (req, res) => {
+    fs.readFile(historyFilePath, 'utf8', (err, data) => {
+        if (err) {
+            return res.status(500).json({ error: 'Не удалось прочитать файл' });
+        }
+
+        const lines = data.trim().split('\n');
+        const history = lines.map(line => {
+            const [username, meteorName, action, date] = line.split('|');
+            return { username, meteorName, action, date };
+        });
+
+        res.json(history);
+    });
+});
+
+
+app.get('/history',  checkAuth, (req, res) => {
+    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
+
+app.get('/users',  checkAuth, (req, res) => {
     res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
@@ -299,15 +391,6 @@ app.post('/delete-data', (req, res) => {
 });
 
 
-
-app.get('/users',  checkAuth, (req, res) => {
-    res.sendFile(path.join(__dirname, 'build', 'index.html'));
-});
-
-
-app.get('/history',  checkAuth, (req, res) => {
-    res.sendFile(path.join(__dirname, 'build', 'index.html'));
-});
 
 // Маршрут для выхода из системы
 app.post('/logout', (req, res) => {
