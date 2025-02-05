@@ -2,10 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Header } from '../header/Header';
 import axios from 'axios';
 import './Main.css';
-import dangerImage from '../images/danger.png';
-import notDangerImage from '../images/not_danger.png';
-import dinoColorImage from '../images/dino_color.png';
-import dinoImage from '../images/dino.webp';
+import Card from '../component/card';
 
 const Main = () => {
     const [meteors, setMeteors] = useState([]);
@@ -17,19 +14,6 @@ const Main = () => {
     const [sortOrder, setSortOrder] = useState('A-Z');
     const [activeButtons, setActiveButtons] = useState({});
     const [history, setHistory] = useState([]);
-    const [username, setUsername] = useState(null); // Состояние для имени пользователя
-
-    // Функция для переключения сортировки
-    const handleSortToggle = () => {
-        setSortOrder(sortOrder === 'A-Z' ? 'Z-A' : 'A-Z');
-    };
-
-    // Функция для определения размера изображения
-    const getImageSize = (size) => {
-        if (size < 50) return 'small'; // Маленький метеорит
-        if (size < 150) return 'medium'; // Средний метеорит
-        return 'large'; // Большой метеорит
-    };
 
     // Загрузка данных с API NASA
     useEffect(() => {
@@ -61,7 +45,7 @@ const Main = () => {
         fetchMeteors();
     }, []);
 
-    // Загрузка истории из файла history.txt
+    // Загрузка истории
     useEffect(() => {
         const fetchHistory = async () => {
             try {
@@ -74,7 +58,7 @@ const Main = () => {
         fetchHistory();
     }, []);
 
-    // Обновление состояния кнопок на основе истории
+    // Обновление состояния кнопок
     useEffect(() => {
         const updatedActiveButtons = {};
         filteredMeteors.forEach((meteor, index) => {
@@ -94,33 +78,7 @@ const Main = () => {
         setActiveButtons(updatedActiveButtons);
     }, [history, filteredMeteors]);
 
-    // Обработчик нажатия на кнопку "На уничтожение"
-    const handleDestroyClick = async (index) => {
-        const meteorName = filteredMeteors[index].name;
-
-        try {
-            await axios.post('/destroy', { meteorName }); // Отправляем только название метеорита
-            const response = await axios.get('/get_history');
-            setHistory(response.data);
-        } catch (error) {
-            console.error('Ошибка при отправке запроса на уничтожение:', error);
-        }
-    };
-
-// Обработчик нажатия на кнопку "Отмена"
-    const handleCancelClick = async (index) => {
-        const meteorName = filteredMeteors[index].name;
-
-        try {
-            await axios.post('/recovery', { meteorName }); // Отправляем только название метеорита
-            const response = await axios.get('/get_history');
-            setHistory(response.data);
-        } catch (error) {
-            console.error('Ошибка при отправке запроса на отмену:', error);
-        }
-    };
-
-    // Фильтрация и сортировка данных
+    // Фильтрация и сортировка
     useEffect(() => {
         let filtered = meteors.filter((meteor) => {
             const matchesSearch = meteor.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -142,25 +100,41 @@ const Main = () => {
         setFilteredMeteors(filtered);
     }, [searchTerm, sizeRange, distanceRange, hazardFilter, sortOrder, meteors]);
 
+    // Обработчики кнопок
+    const handleDestroyClick = async (index) => {
+        const meteorName = filteredMeteors[index].name;
+        try {
+            await axios.post('/destroy', { meteorName });
+            const response = await axios.get('/get_history');
+            setHistory(response.data);
+        } catch (error) {
+            console.error('Ошибка при отправке запроса на уничтожение:', error);
+        }
+    };
+
+    const handleCancelClick = async (index) => {
+        const meteorName = filteredMeteors[index].name;
+        try {
+            await axios.post('/recovery', { meteorName });
+            const response = await axios.get('/get_history');
+            setHistory(response.data);
+        } catch (error) {
+            console.error('Ошибка при отправке запроса на отмену:', error);
+        }
+    };
+
     return (
         <div className="main">
             <Header />
             <div className="filters">
-                {/* Поле поиска */}
                 <input
                     type="text"
                     placeholder="Поиск..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
-                {/* Фильтр по размеру */}
                 <div className="filter">
-                    <span>
-                        <b>Размер</b>
-                    </span>
-                    <span>
-                        <b>Мин:</b> {Math.round(sizeRange[0])}
-                    </span>
+                    <span>Размер: Мин {Math.round(sizeRange[0])} м</span>
                     <input
                         type="range"
                         min={Math.min(...meteors.map((m) => m.size))}
@@ -168,9 +142,7 @@ const Main = () => {
                         value={sizeRange[0]}
                         onChange={(e) => setSizeRange([parseFloat(e.target.value), sizeRange[1]])}
                     />
-                    <span>
-                        <b>Макс:</b> {Math.round(sizeRange[1])}
-                    </span>
+                    <span>Макс {Math.round(sizeRange[1])} м</span>
                     <input
                         type="range"
                         min={Math.min(...meteors.map((m) => m.size))}
@@ -179,14 +151,8 @@ const Main = () => {
                         onChange={(e) => setSizeRange([sizeRange[0], parseFloat(e.target.value)])}
                     />
                 </div>
-                {/* Фильтр по расстоянию */}
                 <div className="filter">
-                    <span>
-                        <b>Расстояние</b>
-                    </span>
-                    <span>
-                        <b>Мин:</b> {Math.round(distanceRange[0])}
-                    </span>
+                    <span>Расстояние: Мин {Math.round(distanceRange[0])} км</span>
                     <input
                         type="range"
                         min={Math.min(...meteors.map((m) => parseFloat(m.distance)))}
@@ -194,9 +160,7 @@ const Main = () => {
                         value={distanceRange[0]}
                         onChange={(e) => setDistanceRange([parseFloat(e.target.value), distanceRange[1]])}
                     />
-                    <span>
-                        <b>Макс:</b> {Math.round(distanceRange[1])}
-                    </span>
+                    <span>Макс {Math.round(distanceRange[1])} км</span>
                     <input
                         type="range"
                         min={Math.min(...meteors.map((m) => parseFloat(m.distance)))}
@@ -205,80 +169,26 @@ const Main = () => {
                         onChange={(e) => setDistanceRange([distanceRange[0], parseFloat(e.target.value)])}
                     />
                 </div>
-                {/* Выпадающий список */}
                 <select value={hazardFilter} onChange={(e) => setHazardFilter(e.target.value)}>
                     <option value="Все">Все</option>
                     <option value="Опасен">Опасен</option>
                     <option value="Не опасен">Не опасен</option>
                 </select>
-                {/* Кнопка сортировки */}
-                <button onClick={handleSortToggle}>
+                <button onClick={() => setSortOrder(sortOrder === 'A-Z' ? 'Z-A' : 'A-Z')}>
                     Сортировать: {sortOrder === 'A-Z' ? 'A-Z' : 'Z-A'}
                 </button>
             </div>
-            {/* Блок витрины */}
-            <div className="showcase-container">
-                <div className="showcase">
-                    {filteredMeteors.map((meteor, index) => {
-                        const imageSize = getImageSize(meteor.size);
-                        const imagePath = meteor.isHazardous ? dangerImage : notDangerImage;
-
-                        const { destroyActive = true, cancelActive = false } = activeButtons[index] || {};
-
-                        const isLargeOrHazardous = meteor.size >= 150 || meteor.isHazardous;
-                        const dinoIcon = isLargeOrHazardous && destroyActive ? dinoImage : dinoColorImage;
-
-                        return (
-                            <div key={index} className="card">
-                                {/* Секция для изображения */}
-                                <div className="image-section">
-                                    <img
-                                        src={imagePath}
-                                        alt={meteor.isHazardous ? 'Опасный метеорит' : 'Неопасный метеорит'}
-                                        className={`meteor-image ${imageSize}`}
-                                    />
-                                    {/* Иконка динозавра */}
-                                    <img
-                                        src={dinoIcon}
-                                        alt="Динозавр"
-                                        className="dino-icon"
-                                    />
-                                </div>
-                                {/* Секция для текста */}
-                                <div className="text-section">
-                                    <h3>{meteor.name}</h3>
-                                    <p>Размер: {meteor.size.toFixed(2)} м</p>
-                                    <p>
-                                        Расстояние до Земли: <br /> {parseFloat(meteor.distance).toFixed(2)} км
-                                    </p>
-                                    <p>Опасность: {meteor.isHazardous ? 'Опасен' : 'Не опасен'}</p>
-                                </div>
-                                {/* Секция для кнопок */}
-                                <div className="button-section">
-                                    <button
-                                        style={{
-                                            backgroundColor: destroyActive ? '#ff4d4d' : '#7c8887',
-                                            cursor: destroyActive ? 'pointer' : 'not-allowed',
-                                        }}
-                                        onClick={() => destroyActive && handleDestroyClick(index)}
-                                    >
-                                        На уничтожение
-                                    </button>
-                                    <button
-                                        style={{
-                                            marginTop: '10px',
-                                            backgroundColor: cancelActive ? '#1a9dff' : '#7c8887',
-                                            cursor: cancelActive ? 'pointer' : 'not-allowed',
-                                        }}
-                                        onClick={() => cancelActive && handleCancelClick(index)}
-                                    >
-                                        Отмена
-                                    </button>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
+            <div className="showcase">
+                {filteredMeteors.map((meteor, index) => (
+                    <Card
+                        key={index}
+                        meteor={meteor}
+                        onDestroyClick={() => handleDestroyClick(index)}
+                        onCancelClick={() => handleCancelClick(index)}
+                        destroyActive={activeButtons[index]?.destroyActive || false}
+                        cancelActive={activeButtons[index]?.cancelActive || false}
+                    />
+                ))}
             </div>
         </div>
     );

@@ -1,0 +1,91 @@
+
+.card {
+    border: 1px solid #ccc;
+    padding: 15px;
+    border-radius: 8px;
+    width: 800px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: rgba(255, 255, 255, 0.85);
+}
+
+.card .image-section {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative; /* Для позиционирования иконки внутри секции */
+}
+
+.dino-icon {
+    position: absolute;
+    bottom: 1%; /* Расположение внизу */
+    left: 1%; /* Расположение слева */
+    width: 30%; /* Размер иконки (не более 10% от секции) */
+    height: auto; /* Сохраняем пропорции */
+}
+
+.card .text-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.card .text-section p {
+    margin: 2px 0;
+    line-height: 1.2;
+}
+
+.card .text-section h3 {
+    margin: 15px;
+    color: #1b1b1b;
+}
+
+/* Секция для кнопок */
+.card .button-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column; /* Кнопки будут расположены друг под другом */
+    justify-content: center;
+    align-items: center;
+    gap: 10px; /* Расстояние между кнопками */
+}
+
+.card button {
+    padding: 10px 20px;
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    min-width: 70%;
+}
+
+.card button:hover {
+    background-color: #cc0000;
+}
+
+.meteor-image {
+    display: block;
+    margin: 0 auto 10px;
+    object-fit: cover;
+}
+
+.meteor-image.small {
+    width: 35%;
+    height: 35%;
+}
+
+.meteor-image.medium {
+    width: 63%;
+    height: 63%;
+}
+
+.meteor-image.large {
+    width: 85%;
+    height: 85%;
+}
