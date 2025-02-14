@@ -15,6 +15,39 @@ const Main = () => {
     const [activeButtons, setActiveButtons] = useState({});
     const [history, setHistory] = useState([]);
 
+    // WebSocket соединение
+    useEffect(() => {
+        const ws = new WebSocket('ws://localhost:8080');
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            const { meteorName, action } = data;
+
+            setHistory((prevHistory) => {
+                const newHistory = [...prevHistory, { meteorName, action, date: new Date().toLocaleString() }];
+                return newHistory;
+            });
+
+            setActiveButtons((prevButtons) => {
+                const updatedButtons = { ...prevButtons };
+                const index = filteredMeteors.findIndex((meteor) => meteor.name === meteorName);
+                if (index !== -1) {
+                    if (action === 'Помещён на уничтожение') {
+                        updatedButtons[index] = { destroyActive: false, cancelActive: true };
+                    } else if (action === 'Снят с уничтожения') {
+                        updatedButtons[index] = { destroyActive: true, cancelActive: false };
+                    }
+                }
+                return updatedButtons;
+            });
+        };
+
+        return () => {
+            ws.close();
+        };
+    }, [filteredMeteors]);
+
+
     // Загрузка данных с API NASA
     useEffect(() => {
         const fetchMeteors = async () => {
