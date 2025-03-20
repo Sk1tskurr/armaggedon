@@ -1,0 +1,147 @@
+/* Медиа-запрос для мобильных устройств */
+@media (max-width: 768px) {
+    .filters {
+        flex-direction: column; /* Элементы фильтров располагаются вертикально */
+        gap: 10px; /* Уменьшаем расстояние между элементами */
+        padding: 10px; /* Уменьшаем внутренние отступы */
+    }
+
+    .filters input[type="text"],
+    .filters select,
+    .filters button {
+        width: 100%; /* Элементы занимают всю ширину */
+        margin: 5px 0; /* Добавляем отступы между элементами */
+    }
+
+    .filter input[type="range"] {
+        width: 100%; /* Ползунки занимают всю ширину */
+    }
+
+    .showcase-container {
+        height: auto; /* Убираем фиксированную высоту */
+        padding: 10px; /* Уменьшаем внутренние отступы */
+    }
+
+    .card {
+        width: 100%; /* Карточки занимают всю ширину */
+        height: auto; /* Убираем фиксированную высоту */
+        flex-direction: column; /* Элементы карточки располагаются вертикально */
+        padding: 10px; /* Уменьшаем внутренние отступы */
+    }
+
+    .card .image-section,
+    .card .text-section,
+    .card .button-section {
+        width: 100%; /* Секции занимают всю ширину */
+    }
+
+    .card .button-section {
+        margin-top: 10px; /* Добавляем отступ сверху */
+    }
+
+    .meteor-image.small,
+    .meteor-image.medium,
+    .meteor-image.large {
+        width: 50%; /* Уменьшаем размер изображений */
+        height: auto; /* Сохраняем пропорции */
+    }
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.filters {
+    display: flex;
+    flex-direction: row;
+    justify-content: center; /* Центрируем элементы по горизонтали */
+    align-items: center; /* Центрируем элементы по вертикали */
+    gap: 20px; /* Расстояние между элементами */
+    margin-bottom: 30px;
+    background-color: rgba(255, 255, 255, 0.45);
+    border-radius: 10px;
+    padding: 10px 20px;
+    width: 90%;
+}
+
+/* Поле поиска */
+.filters input[type="text"] {
+    width: 10%;
+    height: 15%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    /* Убираем отступы, которые могут смещать элемент */
+    margin-left: auto;
+    margin-right: auto; /* Отступ от правого края */
+}
+
+/* Фильтр по размеру и расстоянию */
+.filter {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.filter input[type="range"] {
+    width: 150px;
+}
+
+/* Выпадающий список */
+.filters select {
+    width: 10%;
+    height: 15%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-left: auto; /* Отступ от фильтра "Расстояние" */
+    margin-right: auto; /* Отступ от правого края */
+}
+
+/* Кнопка сортировки */
+.filters button {
+    width: 10%;
+    height: 15%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #ff4d4d;
+    color: white;
+    cursor: pointer;
+    margin-left: auto; /* Отступ от выпадающего списка */
+    margin-right: auto; /* Отступ от правого края */
+}
+
+.filters button:hover {
+    background-color: #cc0000;
+}
+
+/* Остальные стили */
+.showcase-container {
+    position: relative;
+    width: 90%;
+    height: 60vh;
+    /*background-color: rgba(255, 255, 255, 0.8);*/
+    border-radius: 10px;
+    overflow-y: auto;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    scrollbar-width: none;
+}
+
+.showcase-container::-webkit-scrollbar {
+    display: none;
+}
+
+.showcase {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    margin: 0 auto;
+    max-width: 100%;
+    padding-bottom: 5%;
+}
+
