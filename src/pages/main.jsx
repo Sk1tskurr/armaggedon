@@ -15,12 +15,45 @@ const Main = () => {
     const [activeButtons, setActiveButtons] = useState({});
     const [history, setHistory] = useState([]);
 
+    // WebSocket соединение
+    useEffect(() => {
+        const ws = new WebSocket('ws://localhost:8080');
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            const { meteorName, action } = data;
+
+            setHistory((prevHistory) => {
+                const newHistory = [...prevHistory, { meteorName, action, date: new Date().toLocaleString() }];
+                return newHistory;
+            });
+
+            setActiveButtons((prevButtons) => {
+                const updatedButtons = { ...prevButtons };
+                const index = filteredMeteors.findIndex((meteor) => meteor.name === meteorName);
+                if (index !== -1) {
+                    if (action === 'Помещён на уничтожение') {
+                        updatedButtons[index] = { destroyActive: false, cancelActive: true };
+                    } else if (action === 'Снят с уничтожения') {
+                        updatedButtons[index] = { destroyActive: true, cancelActive: false };
+                    }
+                }
+                return updatedButtons;
+            });
+        };
+
+        return () => {
+            ws.close();
+        };
+    }, [filteredMeteors]);
+
+
     // Загрузка данных с API NASA
     useEffect(() => {
         const fetchMeteors = async () => {
             try {
                 const response = await axios.get(
-                    'https://api.nasa.gov/neo/rest/v1/feed?start_date=2015-09-07&end_date=2015-09-08&api_key=ElN1grRp9GLZYYg8pAerHc3aq8dLfPfmshKAr89I'
+                    'https://api.nasa.gov/neo/rest/v1/feed?start_date=2001-01-01&end_date=2001-01-07&api_key=ElN1grRp9GLZYYg8pAerHc3aq8dLfPfmshKAr89I'
                 );
                 const data = Object.values(response.data.near_earth_objects).flat();
                 const formattedData = data.map((meteor) => ({
@@ -125,7 +158,7 @@ const Main = () => {
 
     return (
         <div className="main">
-            <Header />
+            <Header/>
             <div className="filters">
                 <input
                     type="text"
@@ -178,17 +211,19 @@ const Main = () => {
                     Сортировать: {sortOrder === 'A-Z' ? 'A-Z' : 'Z-A'}
                 </button>
             </div>
-            <div className="showcase">
-                {filteredMeteors.map((meteor, index) => (
-                    <Card
-                        key={index}
-                        meteor={meteor}
-                        onDestroyClick={() => handleDestroyClick(index)}
-                        onCancelClick={() => handleCancelClick(index)}
-                        destroyActive={activeButtons[index]?.destroyActive || false}
-                        cancelActive={activeButtons[index]?.cancelActive || false}
-                    />
-                ))}
+            <div className="showcase-container">
+                <div className="showcase">
+                    {filteredMeteors.map((meteor, index) => (
+                        <Card
+                            key={index}
+                            meteor={meteor}
+                            onDestroyClick={() => handleDestroyClick(index)}
+                            onCancelClick={() => handleCancelClick(index)}
+                            destroyActive={activeButtons[index]?.destroyActive || false}
+                            cancelActive={activeButtons[index]?.cancelActive || false}
+                        />
+                    ))}
+                </div>
             </div>
         </div>
     );

@@ -2,7 +2,7 @@ import React from 'react';
 import './card.css';
 import dangerImage from '../images/danger.png';
 import notDangerImage from '../images/not_danger.png';
-import dinoColorImage from '../images/dino_color.png';
+import dinoColorImage from '../images/dino_pink.webp';
 import dinoImage from "../images/dino.webp";
 
 interface Meteor {
@@ -22,8 +22,8 @@ interface CardProps {
 
 const Card: React.FC<CardProps> = ({ meteor, onDestroyClick, onCancelClick, destroyActive, cancelActive }) => {
     const getImageSize = (size: number) => {
-        if (size < 50) return 'small';
-        if (size < 150) return 'medium';
+        if (size < 500) return 'small';
+        if (size < 1000) return 'medium';
         return 'large';
     };
 

@@ -1,3 +1,32 @@
+const WebSocket = require('ws');
+
+// Создаем WebSocket сервер
+const wss = new WebSocket.Server({ port: 8080 });
+
+// Обработчик подключения клиента
+wss.on('connection', (ws) => {
+    console.log('Новое соединение установлено');
+
+    // Обработчик сообщений от клиента
+    ws.on('message', (message) => {
+        console.log('Получено сообщение:', message);
+    });
+
+    // Обработчик закрытия соединения
+    ws.on('close', () => {
+        console.log('Соединение закрыто');
+    });
+});
+
+// Функция для отправки обновлений всем клиентам
+function broadcastUpdate(data) {
+    wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify(data));
+        }
+    });
+}
+
 const express = require('express');
 const session = require('express-session');
 const fs = require('fs');
@@ -196,8 +225,8 @@ app.get('/main', checkAuth, (req, res) => {
 
 // Обработка POST-запроса /destroy
 app.post('/destroy', checkAuth, (req, res) => {
-    const { meteorName } = req.body; // Получаем название метеорита из тела запроса
-    const username = req.session.username; // Берем имя пользователя из сессии
+    const { meteorName } = req.body;
+    const username = req.session.username;
     if (!username || !meteorName) {
         return res.status(400).json({ success: false, message: 'Недостаточно данных' });
     }
@@ -216,14 +245,19 @@ app.post('/destroy', checkAuth, (req, res) => {
         if (err) {
             return res.status(500).json({ success: false, message: 'Ошибка записи в файл' });
         }
+
+        // Отправляем обновление всем клиентам
+        broadcastUpdate({ meteorName, action: 'Помещён на уничтожение' });
+
         res.json({ success: true });
     });
 });
 
+
 // Обработка POST-запроса /recovery
 app.post('/recovery', checkAuth, (req, res) => {
-    const { meteorName } = req.body; // Получаем название метеорита из тела запроса
-    const username = req.session.username; // Берем имя пользователя из сессии
+    const { meteorName } = req.body;
+    const username = req.session.username;
     if (!username || !meteorName) {
         return res.status(400).json({ success: false, message: 'Недостаточно данных' });
     }
@@ -242,6 +276,10 @@ app.post('/recovery', checkAuth, (req, res) => {
         if (err) {
             return res.status(500).json({ success: false, message: 'Ошибка записи в файл' });
         }
+
+        // Отправляем обновление всем клиентам
+        broadcastUpdate({ meteorName, action: 'Снят с уничтожения' });
+
         res.json({ success: true });
     });
 });
