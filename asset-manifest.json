@@ -1,0 +1,21 @@
+{
+  "files": {
+    "main.css": "/armaggedon/static/css/main.a18ea041.css",
+    "main.js": "/armaggedon/static/js/main.f9c87c12.js",
+    "static/js/919.2cb5b8de.chunk.js": "/armaggedon/static/js/919.2cb5b8de.chunk.js",
+    "static/media/not_danger.png": "/armaggedon/static/media/not_danger.70414ecb0b901816daab.png",
+    "static/media/bg.jpg": "/armaggedon/static/media/bg.e66d9866be3167931301.jpg",
+    "static/media/danger.png": "/armaggedon/static/media/danger.2f7ada1423bc8eda569e.png",
+    "static/media/loading.gif": "/armaggedon/static/media/loading.bc17e64bed01019ddfca.gif",
+    "static/media/dino_pink.webp": "/armaggedon/static/media/dino_pink.38cacef5804f585a41de.webp",
+    "static/media/dino.webp": "/armaggedon/static/media/dino.6a98859fdc01b4d11f5d.webp",
+    "index.html": "/armaggedon/index.html",
+    "main.a18ea041.css.map": "/armaggedon/static/css/main.a18ea041.css.map",
+    "main.f9c87c12.js.map": "/armaggedon/static/js/main.f9c87c12.js.map",
+    "919.2cb5b8de.chunk.js.map": "/armaggedon/static/js/919.2cb5b8de.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.a18ea041.css",
+    "static/js/main.f9c87c12.js"
+  ]
+}
